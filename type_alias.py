@@ -111,18 +111,22 @@ def find_union_types(string):
 def find_macro_union_types(string):
     matches = []
 
-    string = string.replace('type alias', 'asdf')
-    grab_union_types = re.findall('with decoder type .+?\=.+', string, re.DOTALL)
+    string = string.replace('type alias', '%%%%')
+    known_macros = ['decoder', 'enum']
 
-    for match in grab_union_types:
-        build_up = []
+    ## TODO: this is dumb
+    for macro in known_macros:
+        grab_union_types = re.findall('with ' + macro + ' type .+?\=.+', string, re.DOTALL)
 
-        for line in match.split('\n'):
-            if len(build_up) > 1 and not line.startswith(' '):
-                break
+        for match in grab_union_types:
+            build_up = []
 
-            build_up.append(line)
+            for line in match.split('\n'):
+                if len(build_up) > 1 and not line.startswith(' '):
+                    break
 
-        matches.append('\n'.join(build_up))
+                build_up.append(line)
+
+            matches.append('\n'.join(build_up))
 
     return matches

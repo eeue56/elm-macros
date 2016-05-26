@@ -1,5 +1,6 @@
 from type_alias import create_type_alias, find_macro_type_aliases, find_union_types, find_type_aliases, find_macro_union_types
-from decoder import create_decoder, create_encoder, create_union_type_decoder, create_union_type_encoder
+from decoder import *
+from difflib import context_diff
 
 
 exampleAlias = """
@@ -8,10 +9,15 @@ with decoder type alias Something =
   { name : String
   }
 
+
 with decoder type Animal
     = Cat
     | Dog
 
+with enum type Month
+    = Jan
+    | Feb
+    | March
 """
 
 exampleOutput = """
@@ -40,6 +46,17 @@ decodeAnimal =
     in
         Json.Decode.customDecoder Json.Decode.string decodeToType
 
+type Month
+    = Jan
+    | Feb
+    | March
+
+toIntMonth : Month -> Int
+toIntMonth something =
+    case something of
+        Jan -> 0
+        Feb -> 1
+        March -> 2
 """
 
 def with_decoder(file):
@@ -57,14 +74,20 @@ def with_decoder(file):
             "decoder": create_decoder(alias)
         })
 
+
     for union in unions:
+        if 'with decoder' in union:
+            f = create_union_type_decoder
+        else :
+            f = create_union_type_enum
+
+
         solo_union = find_union_types(union)[0]
         results.append({
             "original" : union,
             "alias" : solo_union,
-            "decoder": create_union_type_decoder(union)
+            "decoder": f(union)
         })
-
 
     return results
 
@@ -79,7 +102,13 @@ def test():
     for result in with_decoder(with_decode):
         with_decode = replace_original(with_decode, result)
 
-    assert with_decode.strip() == exampleOutput.strip()
+    for line in context_diff(with_decode.strip().split(), exampleOutput.strip().split(), fromfile='before.py', tofile='after.py'):
+        print(line)
+
+    #print(exampleOutput)
+    #print(with_decode)
+
+    assert with_decode.strip().split() == exampleOutput.strip().split()
 
 
 

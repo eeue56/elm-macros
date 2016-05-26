@@ -218,3 +218,28 @@ encode{type_name} item =
 """.format(type_name=type_name, patterns=formatted_constructors)
 
     return output.strip()
+
+def create_union_type_enum(string, has_snakecase=False):
+    """
+        string is a union type that looks like
+            type Action = Noop | Run
+    """
+    string = re.sub('[\\n\\r]', '', string)
+
+    type_name = get_union_type_name(string)
+    constructors = get_constructors(string)
+
+    formatted_constructors = '\n        '.join(
+        '{constructor} -> {i}'.format(constructor=constructor, i=i) for (i, constructor) in enumerate(constructors)
+        )
+
+
+    output = """
+
+toInt{type_name} : {type_name} -> Int
+toInt{type_name} something =
+    case something of
+        {patterns}
+""".format(type_name=type_name, patterns=formatted_constructors)
+
+    return output.strip()

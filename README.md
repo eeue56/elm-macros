@@ -30,6 +30,12 @@ b = "hello"
 
 c : Something
 c = { name = b }
+
+with enum type Month
+    = Jan
+    | Feb
+    | March
+
 ```
 
 into
@@ -65,6 +71,7 @@ decodeAnimal =
     in
         Json.Decode.customDecoder Json.Decode.string decodeToType
 
+
 a = 5
 
 b : String
@@ -73,4 +80,17 @@ b = "hello"
 
 c : Something
 c = { name = b }
+
+type Month
+    = Jan
+    | Feb
+    | March
+
+toIntMonth : Month -> Int
+toIntMonth something =
+    case something of
+        Jan -> 0
+        Feb -> 1
+        March -> 2
+
 ```

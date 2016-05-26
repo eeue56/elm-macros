@@ -10,6 +10,7 @@ with decoder type Animal
     | Dog
     | Goat
 
+
 a = 5
 
 b : String
@@ -18,3 +19,8 @@ b = "hello"
 
 c : Something
 c = { name = b }
+
+with enum type Month
+    = Jan
+    | Feb
+    | March
