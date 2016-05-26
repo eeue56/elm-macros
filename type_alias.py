@@ -70,14 +70,24 @@ type alias {name} =
 
 
 def find_type_aliases(string):
-    string = re.sub('[\\n\\r]', '', string)
+    string = re.sub('[\\n\\r]', '%%%', string)
 
     grab_type_aliases = re.findall('type alias.+?\=.+?}', string)
 
     if grab_type_aliases is None or len(grab_type_aliases) == 0:
         return []
 
-    return grab_type_aliases
+    return [alias.replace('%%%', '\n') for alias in grab_type_aliases]
+
+def find_macro_type_aliases(string):
+    string = re.sub('[\\n\\r]', '%%%', string)
+
+    grab_type_aliases = re.findall('with decoder type alias.+?\=.+?}', string)
+
+    if grab_type_aliases is None or len(grab_type_aliases) == 0:
+        return []
+
+    return [alias.replace('%%%', '\n') for alias in grab_type_aliases]
 
 def find_union_types(string):
     matches = []
