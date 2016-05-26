@@ -5,6 +5,11 @@ with decoder type alias Something =
   }
 
 
+with decoder type Animal
+    = Cat
+    | Dog
+    | Goat
+
 a = 5
 
 b : String

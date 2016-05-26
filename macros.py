@@ -1,4 +1,4 @@
-from type_alias import create_type_alias, find_macro_type_aliases, find_union_types, find_type_aliases
+from type_alias import create_type_alias, find_macro_type_aliases, find_union_types, find_type_aliases, find_macro_union_types
 from decoder import create_decoder, create_encoder, create_union_type_decoder, create_union_type_encoder
 
 
@@ -7,6 +7,10 @@ exampleAlias = """
 with decoder type alias Something =
   { name : String
   }
+
+with decoder type Animal
+    = Cat
+    | Dog
 
 """
 
@@ -21,11 +25,27 @@ decodeSomething =
     Json.Decode.succeed Something
         |: ("name" := string)
 
+type Animal
+    = Cat
+    | Dog
+
+decodeAnimal : Json.Decode.Decoder Animal
+decodeAnimal =
+    let
+        decodeToType string =
+            case string of
+                "Cat" -> Result.Ok Cat
+                "Dog" -> Result.Ok Dog
+                _ -> Result.Err ("Not valid pattern for decoder to Animal. Pattern: " ++ (toString string))
+    in
+        Json.Decode.customDecoder Json.Decode.string decodeToType
+
 """
 
 def with_decoder(file):
     """ generate a decoder for a type definition """
     aliases = find_macro_type_aliases(file)
+    unions = find_macro_union_types(file)
 
     results = []
 
@@ -37,17 +57,28 @@ def with_decoder(file):
             "decoder": create_decoder(alias)
         })
 
+    for union in unions:
+        solo_union = find_union_types(union)[0]
+        results.append({
+            "original" : union,
+            "alias" : solo_union,
+            "decoder": create_union_type_decoder(union)
+        })
+
+
     return results
 
 
 def replace_original(text, result):
     replacement = '\n\n'.join([ result['alias'], result['decoder'] ])
-    print(result['original'])
     return text.replace(result['original'], replacement)
 
 def test():
-    result = with_decoder(exampleAlias)[0]
-    with_decode = replace_original(exampleAlias, result)
+    with_decode = exampleAlias
+
+    for result in with_decoder(with_decode):
+        with_decode = replace_original(with_decode, result)
+
     assert with_decode.strip() == exampleOutput.strip()
 
 

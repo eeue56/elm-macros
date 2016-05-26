@@ -104,6 +104,25 @@ def find_union_types(string):
 
             build_up.append(line)
 
-        matches.append(''.join(build_up))
+        matches.append('\n'.join(build_up))
+
+    return matches
+
+def find_macro_union_types(string):
+    matches = []
+
+    string = string.replace('type alias', 'asdf')
+    grab_union_types = re.findall('with decoder type .+?\=.+', string, re.DOTALL)
+
+    for match in grab_union_types:
+        build_up = []
+
+        for line in match.split('\n'):
+            if len(build_up) > 1 and not line.startswith(' '):
+                break
+
+            build_up.append(line)
+
+        matches.append('\n'.join(build_up))
 
     return matches
