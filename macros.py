@@ -51,5 +51,17 @@ def test():
     assert with_decode.strip() == exampleOutput.strip()
 
 
+
+def run_on_file(filename):
+    with open(filename) as f:
+        text = f.read()
+
+    for result in with_decoder(text):
+        text = replace_original(text, result)
+
+    with open(filename, 'w') as f:
+        f.write(text)
+
+
 if __name__ == '__main__':
     test()
